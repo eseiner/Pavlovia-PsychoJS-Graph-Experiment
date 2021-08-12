@@ -1,6 +1,6 @@
-﻿/****************************************** 
- * Graphical Reproduction Experiment Test *
- ******************************************/
+/************************************** 
+ * Graph Reproduction Experiment Test *
+ **************************************/
 
 import { PsychoJS } from './lib/core-2021.1.3.js';
 import * as core from './lib/core-2021.1.3.js';
@@ -26,9 +26,52 @@ psychoJS.openWindow({
   waitBlanking: true
 });
 
+var trialCount = [];
+    function getSession(data) {
+    var allRows = data.split(' '); // split rows at new line
+    trialCount.push(allRows[1])
+
+    }
+
+    $.ajax({
+        url: 'trialCount.txt',
+        dataType: 'text',
+        async: false,
+    }).done(getSession);
+
+var sessionID = parseInt(trialCount[0]);
+
+
+var accessToken = 'iDgAJBsXhamQDuxLiVyF';
+   var del = {async: false,
+  "crossDomain": true,
+  url: 'https://gitlab.pavlovia.org/api/v4/projects/157037/repository/files/trialCount.txt?branch=master&commit_message=new',
+  method: "DELETE",
+  headers: {
+    "PRIVATE-TOKEN": accessToken
+  }
+}
+
+$.ajax(del).done(function (response) {
+});
+
+   var update = {async: false,
+  "crossDomain": true,
+  url: 'https://gitlab.pavlovia.org/api/v4/projects/157037/repository/files/trialCount.txt?branch=master&content=trial_count ' + String(sessionID+1) + '&commit_message=new',
+  method: "POST",
+  headers: {
+    "PRIVATE-TOKEN": accessToken
+  }
+}
+
+$.ajax(update).done(function (response) {
+});
+
+
 // store info about the experiment session:
-let expName = 'Graphical Reproduction Experiment';  // from the Builder filename that created this script
-let expInfo = {'participant': '', 'session': '001'};
+let expName = 'demo2 draft';  // from the Builder filename that created this script
+let expInfo = {'participant': 'data_PARTICIPANT', 'session': ''};
+
 
 // Start code blocks for 'Before Experiment'
 // schedule the experiment:
@@ -42,6 +85,7 @@ const dialogCancelScheduler = new Scheduler(psychoJS);
 psychoJS.scheduleCondition(function() { return (psychoJS.gui.dialogComponent.button === 'OK'); }, flowScheduler, dialogCancelScheduler);
 
 // flowScheduler gets run if the participants presses OK
+
 flowScheduler.add(updateInfo); // add timeStamp
 flowScheduler.add(experimentInit);
 flowScheduler.add(trialRoutineBegin());
@@ -56,16 +100,16 @@ psychoJS.start({
   expName: expName,
   expInfo: expInfo,
   resources: [
+    {'name': 'data/data_PARTICIPANT_demo2_draft_' + String(sessionID) + '.csv', 'path': 'data/data_PARTICIPANT_demo2_draft_' + String(sessionID) + '.csv'},
     {'name': 'test_blank.png', 'path': 'test_blank.png'}
   ]
-});
 
-psychoJS.experimentLogger.setLevel(core.Logger.ServerLevel.DEBUG);
+});
 
 
 var frameDur;
 function updateInfo() {
-  expInfo['date'] = util.MonotonicClock.getDateStr();  // add a simple timestamp
+  expInfo['date'] = String(sessionID + 1);  // add a simple timestamp
   expInfo['expName'] = expName;
   expInfo['psychopyVersion'] = '2021.1.3';
   expInfo['OS'] = window.navigator.platform;
@@ -87,22 +131,46 @@ function updateInfo() {
 var trialClock;
 var intro_text;
 var starting_graph;
+var shape;
 var intermediate_text;
 var blank_graph;
 var key_resp;
 var mouse;
 var globalClock;
 var routineTimer;
+var rects = [];
+var bars = [];
+var bar_objs = [];
+var myList = [];
 function experimentInit() {
-  // Initialize components for Routine "trial"
+    function successFunction(data) {
+    var allRows = data.split('\n'); // split rows at new line
+    var headerRows = allRows[0].split(',');
+    
+        for (var i=1; i<allRows.length; i++) {
+            var obj = {};
+            var currentLine = allRows[i].split(',');
+            for(var j=0;j<headerRows.length;j++){
+                obj[headerRows[j]] = currentLine[j];
+            }
+            myList.push(obj);
+        }
+    }
+
+    $.ajax({
+        url: 'data/data_PARTICIPANT_demo2_draft_' + String(sessionID) + '.csv',
+        dataType: 'text',
+        async: false,
+    }).done(successFunction);
+  
   trialClock = new util.Clock();
   intro_text = new visual.TextStim({
     win: psychoJS.window,
     name: 'intro_text',
-    text: 'Graphical Serial Reproduction Experiment.\n\nYou will be shown an image of a graph. The graph will dissappear, and you will be asked to reproduce it using your mouse.',
+    text: 'Graphical Serial Reproduction Experiment.\n\nYou will be shown an image of a graph. Reproduce it with your mouse.',
     font: 'Open Sans',
     units: undefined, 
-    pos: [0, 0], height: 0.1,  wrapWidth: undefined, ori: 0.0,
+    pos: [0, 0], height: 0.08,  wrapWidth: undefined, ori: 0.0,
     color: new util.Color('white'),  opacity: undefined,
     depth: 0.0 
   });
@@ -111,18 +179,29 @@ function experimentInit() {
     win : psychoJS.window,
     name : 'starting_graph', units : undefined, 
     image : 'test_blank.png', mask : undefined,
-    ori : 0.0, pos : [0, 0], size : [0.5, 0.5],
+    ori : 0.0, pos : [0, 0], size : [0.75, 0.5],
     color : new util.Color([1, 1, 1]), opacity : undefined,
     flipHoriz : false, flipVert : false,
     texRes : 128.0, interpolate : true, depth : -1.0 
   });
+  for (let i = 0; i < 43; i++) {
+      rects[i] = new visual.Rect ({
+        win: psychoJS.window, name: 'polygon' + String(i), 
+        width: 0.005, height: parseFloat(myList[i]['Y_values']) + 0.389/2,
+        ori: 0.0, pos: [(i)*0.01358-0.275, (parseFloat(myList[i]['Y_values'])+0.389/2.0)/2.0-0.389/2.0],
+        lineWidth: 1.0, lineColor: new util.Color('blue'),
+        fillColor: new util.Color('blue'),
+        opacity: undefined, depth: -6, interpolate: true
+      });
+  }
+  
   intermediate_text = new visual.TextStim({
     win: psychoJS.window,
     name: 'intermediate_text',
     text: 'Using your mouse, reproduce the graph previously shown.\n\nPress the space bar when finished.',
     font: 'Open Sans',
     units: undefined, 
-    pos: [0, 0], height: 0.1,  wrapWidth: undefined, ori: 0.0,
+    pos: [0, 0], height: 0.08,  wrapWidth: undefined, ori: 0.0,
     color: new util.Color('white'),  opacity: undefined,
     depth: -2.0 
   });
@@ -131,11 +210,30 @@ function experimentInit() {
     win : psychoJS.window,
     name : 'blank_graph', units : undefined, 
     image : 'test_blank.png', mask : undefined,
-    ori : 0.0, pos : [0, 0], size : [0.5, 0.5],
+    ori : 0.0, pos : [0, 0], size : [0.75, 0.5],
     color : new util.Color([1, 1, 1]), opacity : undefined,
     flipHoriz : false, flipVert : false,
     texRes : 128.0, interpolate : true, depth : -3.0 
   });
+  
+  shape = new visual.Rect ({
+        win: psychoJS.window, name: 'shape', 
+        width: 0.6, height: 0.5,
+        ori: 0.0, pos: [0, 0],
+        opacity: 0, depth: -6, interpolate: true
+      });
+  
+  for (let i = 0; i < 43; i++) {
+      bar_objs[i] = new visual.Rect ({
+        win: psychoJS.window, name: 'polygon' + String(i), 
+        width: 0.005, height: 0,
+        ori: 0.0, pos: [i*0.01358-0.275, 0],
+        lineWidth: 1.0, lineColor: new util.Color('blue'),
+        fillColor: new util.Color('blue'),
+        opacity: undefined, depth: -6, interpolate: true
+      });
+  }
+  
   key_resp = new core.Keyboard({psychoJS: psychoJS, clock: new util.Clock(), waitForStart: true});
   
   mouse = new core.Mouse({
@@ -216,11 +314,22 @@ function trialRoutineEachFrame(snapshot) {
       starting_graph.frameNStart = frameN;  // exact frame index
       
       starting_graph.setAutoDraw(true);
+      shape.setAutoDraw(true);
+      rects.forEach(draw);
+
+      function draw(item, index, arr) {
+        arr[index].setAutoDraw(true);
+      }
     }
 
     frameRemains = 2.0 + 2.0 - psychoJS.window.monitorFramePeriod * 0.75;  // most of one frame period left
     if (starting_graph.status === PsychoJS.Status.STARTED && t >= frameRemains) {
       starting_graph.setAutoDraw(false);
+      rects.forEach(clear);
+
+      function clear(item, index, arr) {
+        arr[index].setAutoDraw(false);
+      }
     }
     
     // *intermediate_text* updates
@@ -238,12 +347,24 @@ function trialRoutineEachFrame(snapshot) {
     }
     
     // *blank_graph* updates
-    if (t >= 6.0 && blank_graph.status === PsychoJS.Status.NOT_STARTED) {
+    if (t >= 6.0) { //blank_graph.status === PsychoJS.Status.NOT_STARTED
       // keep track of start time/frame for later
       blank_graph.tStart = t;  // (not accounting for frame time here)
       blank_graph.frameNStart = frameN;  // exact frame index
       
       blank_graph.setAutoDraw(true);
+      let buttons = mouse.getPressed();
+      let left_button = buttons[0];
+      if (left_button) {
+          var pos = mouse.getPos();
+          if (pos[0] < 0.308 && pos[0] > -.275) {
+              var x_index = parseInt((pos[0]+0.275)/0.01358)
+              bar_objs[x_index].setHeight(pos[1] + 0.389/2);
+              bar_objs[x_index].setPos([x_index*0.01358-0.275, (pos[1]+0.389/2.0)/2.0-0.389/2.0]);
+              bar_objs[x_index].setAutoDraw(true);
+              bars[x_index] = pos[1];
+          }
+      }
     }
 
     
@@ -307,9 +428,8 @@ function trialRoutineEnd(snapshot) {
         thisComponent.setAutoDraw(false);
       }
     }
-    psychoJS.experiment.addData('key_resp.keys', key_resp.keys);
+    // psychoJS.experiment.addData('key_resp.keys', key_resp.keys);
     if (typeof key_resp.keys !== 'undefined') {  // we had a response
-        psychoJS.experiment.addData('key_resp.rt', key_resp.rt);
         routineTimer.reset();
         }
     
@@ -317,12 +437,12 @@ function trialRoutineEnd(snapshot) {
     // store data for thisExp (ExperimentHandler)
     _mouseXYs = mouse.getPos();
     _mouseButtons = mouse.getPressed();
-    psychoJS.experiment.addData('mouse.x', _mouseXYs[0]);
-    psychoJS.experiment.addData('mouse.y', _mouseXYs[1]);
-    psychoJS.experiment.addData('mouse.leftButton', _mouseButtons[0]);
-    psychoJS.experiment.addData('mouse.midButton', _mouseButtons[1]);
-    psychoJS.experiment.addData('mouse.rightButton', _mouseButtons[2]);
-    // the Routine "trial" was not non-slip safe, so reset the non-slip timer
+        for (var i = 0; i < 43; i++) {
+            psychoJS.experiment.addData("X_values", String(i));
+            psychoJS.experiment.addData("Y_values", String(bars[i]));
+            psychoJS.experiment.nextEntry();
+        }
+        psychoJS.experiment.save();
     routineTimer.reset();
     
     return Scheduler.Event.NEXT;
