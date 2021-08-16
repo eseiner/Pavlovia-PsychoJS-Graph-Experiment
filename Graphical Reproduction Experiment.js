@@ -45,7 +45,7 @@ var sessionID = parseInt(trialCount[0]);
 var accessToken = 'iDgAJBsXhamQDuxLiVyF';
    var del = {async: false,
   "crossDomain": true,
-  url: 'https://gitlab.pavlovia.org/api/v4/projects/156020/repository/files/trialCount.txt?branch=master&commit_message=new',
+  url: 'https://gitlab.pavlovia.org/api/v4/projects/157734/repository/files/trialCount.txt?branch=master&commit_message=new',
   method: "DELETE",
   headers: {
     "PRIVATE-TOKEN": accessToken
@@ -57,7 +57,7 @@ $.ajax(del).done(function (response) {
 
    var update = {async: false,
   "crossDomain": true,
-  url: 'https://gitlab.pavlovia.org/api/v4/projects/156020/repository/files/trialCount.txt?branch=master&content=trial_count ' + String(sessionID+1) + '&commit_message=new',
+  url: 'https://gitlab.pavlovia.org/api/v4/projects/157734/repository/files/trialCount.txt?branch=master&content=trial_count ' + String(sessionID+1) + '&commit_message=new',
   method: "POST",
   headers: {
     "PRIVATE-TOKEN": accessToken
